@@ -112,8 +112,8 @@ def analyze_story_context(text: str, summary: str) -> tuple:
     sentiment = 'neutral'  # Default
 
     # Count positive/negative indicators
-    positive_words = ['gain', 'rise', 'up', 'increase', 'growth', 'bull', 'strong', 'beat', 'profit']
-    negative_words = ['loss', 'fall', 'down', 'decrease', 'decline', 'bear', 'weak', 'miss', 'deficit']
+    positive_words = ['gain', 'rise', 'up', 'increase', 'growth', 'bull', 'strong', 'beat', 'profit', 'bullish', 'buy', 'buy the dip', 'buy the rumor', 'buy the news', 'buy the hype', 'buy the pump', 'buy the rally', 'buy the breakout', 'buy the momentum', 'buy the trend', 'buy the support', 'buy the resistance', 'buy the breakout', 'buy the momentum', 'buy the trend', 'buy the support', 'buy the resistance']
+    negative_words = ['loss', 'fall', 'down', 'decrease', 'decline', 'bear', 'weak', 'miss', 'deficit', 'bearish', 'sell', 'sell the rumor', 'sell the news', 'sell the hype', 'sell the pump', 'sell the rally', 'sell the breakout', 'sell the momentum', 'sell the trend', 'sell the support', 'sell the resistance', 'sell the breakout', 'sell the momentum', 'sell the trend', 'sell the support', 'sell the resistance']
 
     pos_count = sum(1 for word in positive_words if word in combined_text)
     neg_count = sum(1 for word in negative_words if word in combined_text)
@@ -144,7 +144,7 @@ def extract_main_subject(text: str) -> str:
     stocks = re.findall(r'\b[A-Z]{2,5}\b', text)
 
     # Common financial terms
-    financial_terms = re.findall(r'\b(bitcoin|ethereum|tesla|apple|microsoft|amazon|meta|google|nvidia|amd)\b', text, re.IGNORECASE)
+    financial_terms = re.findall(r'\b(bitcoin|ethereum|tesla|apple|microsoft|amazon|meta|google|nvidia|amd|btc|eth|crypto|stock|market|trading|price|earnings|revenue|profit|loss|fed|interest|rate|inflation|gdp|unemployment|dollar|euro|currency|bond|yield|nasdaq|sp500|dow)\b', text, re.IGNORECASE)
 
     if financial_terms:
         return financial_terms[0].title()
@@ -172,7 +172,7 @@ def generate_hashtags(text: str, min_count: int = 2, max_count: int = 4) -> List
     words = word_tokenize(text.lower())
 
     # Financial/trading keywords
-    financial_keywords = ['bitcoin', 'crypto', 'stock', 'trading', 'market', 'investment', 'finance', 'earnings', 'tech', 'ai', 'startup']
+    financial_keywords = ['bitcoin', 'crypto', 'stock', 'trading', 'market', 'investment', 'finance', 'earnings', 'tech', 'ai', 'startup', 'ethereum', 'btc', 'eth', 'crypto', 'stock', 'market', 'trading', 'price', 'earnings', 'revenue', 'profit', 'loss', 'fed', 'interest', 'rate', 'inflation', 'gdp', 'unemployment', 'dollar', 'euro', 'currency', 'bond', 'yield', 'nasdaq', 'sp500', 'dow']
 
     # Extract relevant words
     relevant_words = [word for word in words if word in financial_keywords]
@@ -196,29 +196,16 @@ def generate_hashtags(text: str, min_count: int = 2, max_count: int = 4) -> List
 
     return hashtags
 
-
-def generate_short_title(text: str, max_words: int = 7) -> str:
+def generate_short_title(text: str, max_words: int = 10) -> str:
     """
     Generate a short, meaningful title from text using intelligent word scoring.
-
-    Args:
-        text: Article text or summary
-        max_words: Maximum number of words
-
-    Returns:
-        Short title with most important words
     """
     if not text or not text.strip():
         return "News Update"
 
-    # Clean text and tokenize
-    clean_text_input = re.sub(r'[^\w\s]', ' ', text.lower())
-    words = clean_text_input.split()
+    original_words = text.split()
+    clean_words = [re.sub(r'[^\w]', '', word.lower()) for word in original_words]
 
-    if len(words) <= max_words:
-        return ' '.join(text.split()[:max_words])
-
-    # Define filler words to filter out
     filler_words = {
         'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
         'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
@@ -230,68 +217,65 @@ def generate_short_title(text: str, max_words: int = 7) -> str:
         'than', 'then', 'now', 'today', 'yesterday', 'tomorrow', 'said', 'says', 'about'
     }
 
-    # Score words based on importance
+    action_words_scoring = {
+        'announces': 0.5, 'reports': 0.3, 'reveals': 0.4, 'shows': 0.2, 'confirms': 0.5,
+        'launches': 0.8, 'releases': 0.6, 'beats': 1.0, 'surges': 1.0, 'rises': 0.9,
+        'gains': 0.8, 'jumps': 1.0, 'improves': 0.7, 'accelerates': 0.9,
+        'outperforms': 1.0, 'soars': 1.0, 'climbs': 0.9, 'expands': 0.6,
+        'misses': -1.0, 'falls': -0.9, 'plunges': -1.0, 'crashes': -1.0, 'decreases': -0.6,
+        'loses': -0.8, 'declines': -0.7, 'drops': -0.6, 'slows': -0.5, 'cuts': -0.7,
+        'warns': -0.9, 'halts': -1.0, 'underperforms': -1.0, 'downgrades': -1.0,
+        'says': 0.0, 'breaks': 0.2, 'hits': 0.3, 'reaches': 0.4, 'crosses': 0.3,
+        'meets': 0.1, 'expects': 0.1, 'files': 0.0, 'updates': 0.1, 'adds': 0.2,
+        'sets': 0.2, 'resumes': 0.3
+    }
+
+    financial_terms = {
+        'bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'stock', 'market',
+        'trading', 'price', 'earnings', 'revenue', 'profit', 'loss', 'fed',
+        'interest', 'rate', 'inflation', 'gdp', 'unemployment', 'dollar',
+        'euro', 'currency', 'bond', 'yield', 'nasdaq', 'sp500', 'dow'
+    }
+
     word_scores = {}
-    original_words = text.split()
+    for i, (original, clean) in enumerate(zip(original_words, clean_words)):
+        if not clean or clean in filler_words:
+            continue
 
-    for i, word in enumerate(original_words):
-        clean_word = re.sub(r'[^\w]', '', word.lower())
-        if clean_word and clean_word not in filler_words:
-            score = 0
+        score = 0
 
-            # Position scoring (earlier words get higher scores)
-            if i < 5:
-                score += 3
-            elif i < 10:
-                score += 2
-            elif i < 15:
-                score += 1
+        # Position bias
+        if i < 5: score += 3
+        elif i < 10: score += 2
+        elif i < 15: score += 1
 
-            # Capitalization scoring
-            if word[0].isupper():
-                score += 2
+        # Capitalization bias
+        if original[0].isupper():
+            score += 2
 
-            # Action word scoring
-            action_words = {'announces', 'reports', 'reveals', 'shows', 'says', 'confirms',
-                          'launches', 'releases', 'drops', 'rises', 'falls', 'increases',
-                          'decreases', 'beats', 'misses', 'surges', 'crashes', 'breaks',
-                          'hits', 'reaches', 'crosses', 'gains', 'loses', 'jumps', 'plunges'}
+        # Action words
+        score += action_words_scoring.get(clean, 0)
 
-            if clean_word in action_words:
-                score += 2
+        # Financial terms
+        if clean in financial_terms:
+            score += 3
 
-            # Financial terms scoring
-            financial_terms = {'bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'stock', 'market',
-                             'trading', 'price', 'earnings', 'revenue', 'profit', 'loss', 'fed',
-                             'interest', 'rate', 'inflation', 'gdp', 'unemployment', 'dollar',
-                             'euro', 'currency', 'bond', 'yield', 'nasdaq', 'sp500', 'dow'}
+        # Proper noun / brand name boost
+        if original[0].isupper() and len(original) > 1:
+            score += 1
 
-            if clean_word in financial_terms:
-                score += 3
+        word_scores[i] = score
 
-            # Company/proper noun scoring
-            if word[0].isupper() and len(word) > 1:
-                score += 1
-
-            word_scores[i] = score
-
-    # Select top words while preserving order
-    sorted_words = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
-    selected_indices = sorted([idx for idx, score in sorted_words[:max_words]])
-
-    # Build title from selected words in original order
-    title_words = [original_words[i] for i in selected_indices if i < len(original_words)]
-
-    if not title_words:
+    if not word_scores:
         return ' '.join(original_words[:max_words])
 
-    title = ' '.join(title_words)
+    # Sort by score (desc), then position (asc)
+    top_indices = sorted(word_scores.items(), key=lambda x: (-x[1], x[0]))
+    selected = sorted([idx for idx, _ in top_indices[:max_words]])
+    title_words = [original_words[i] for i in selected]
 
-    # Clean up title
-    title = re.sub(r'^\W+', '', title)  # Remove leading non-word characters
-    title = title.strip()
+    # Final formatting
+    title = ' '.join(title_words).strip()
+    title = re.sub(r'\s+', ' ', title)
 
-    if not title:
-        return "News Update"
-
-    return title
+    return title or "News Update"
