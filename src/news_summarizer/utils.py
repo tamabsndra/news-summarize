@@ -199,31 +199,96 @@ def generate_hashtags(text: str, min_count: int = 2, max_count: int = 4) -> List
 
 def generate_short_title(text: str, max_words: int = 7) -> str:
     """
-    Generate a short title from text.
+    Generate a short, meaningful title from text using intelligent word scoring.
 
     Args:
-        text: Article text
+        text: Article text or summary
         max_words: Maximum number of words
 
     Returns:
-        Short title
+        Short title with most important words
     """
-    # Extract first sentence
-    sentences = text.split('.')
-    if not sentences:
+    if not text or not text.strip():
         return "News Update"
 
-    first_sentence = sentences[0].strip()
-    words = first_sentence.split()
+    # Clean text and tokenize
+    clean_text_input = re.sub(r'[^\w\s]', ' ', text.lower())
+    words = clean_text_input.split()
 
-    # Limit to max_words
-    if len(words) > max_words:
-        words = words[:max_words]
+    if len(words) <= max_words:
+        return ' '.join(text.split()[:max_words])
 
-    title = ' '.join(words)
+    # Define filler words to filter out
+    filler_words = {
+        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+        'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
+        'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can',
+        'this', 'that', 'these', 'those', 'it', 'its', 'they', 'them', 'their', 'there',
+        'here', 'where', 'when', 'how', 'why', 'what', 'which', 'who', 'whom', 'whose',
+        'very', 'much', 'many', 'most', 'more', 'some', 'any', 'all', 'each', 'every',
+        'as', 'so', 'too', 'also', 'just', 'only', 'even', 'still', 'yet', 'already',
+        'than', 'then', 'now', 'today', 'yesterday', 'tomorrow', 'said', 'says', 'about'
+    }
 
-    # Clean up
-    title = re.sub(r'^[^a-zA-Z]*', '', title)  # Remove leading non-letters
+    # Score words based on importance
+    word_scores = {}
+    original_words = text.split()
+
+    for i, word in enumerate(original_words):
+        clean_word = re.sub(r'[^\w]', '', word.lower())
+        if clean_word and clean_word not in filler_words:
+            score = 0
+
+            # Position scoring (earlier words get higher scores)
+            if i < 5:
+                score += 3
+            elif i < 10:
+                score += 2
+            elif i < 15:
+                score += 1
+
+            # Capitalization scoring
+            if word[0].isupper():
+                score += 2
+
+            # Action word scoring
+            action_words = {'announces', 'reports', 'reveals', 'shows', 'says', 'confirms',
+                          'launches', 'releases', 'drops', 'rises', 'falls', 'increases',
+                          'decreases', 'beats', 'misses', 'surges', 'crashes', 'breaks',
+                          'hits', 'reaches', 'crosses', 'gains', 'loses', 'jumps', 'plunges'}
+
+            if clean_word in action_words:
+                score += 2
+
+            # Financial terms scoring
+            financial_terms = {'bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'stock', 'market',
+                             'trading', 'price', 'earnings', 'revenue', 'profit', 'loss', 'fed',
+                             'interest', 'rate', 'inflation', 'gdp', 'unemployment', 'dollar',
+                             'euro', 'currency', 'bond', 'yield', 'nasdaq', 'sp500', 'dow'}
+
+            if clean_word in financial_terms:
+                score += 3
+
+            # Company/proper noun scoring
+            if word[0].isupper() and len(word) > 1:
+                score += 1
+
+            word_scores[i] = score
+
+    # Select top words while preserving order
+    sorted_words = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
+    selected_indices = sorted([idx for idx, score in sorted_words[:max_words]])
+
+    # Build title from selected words in original order
+    title_words = [original_words[i] for i in selected_indices if i < len(original_words)]
+
+    if not title_words:
+        return ' '.join(original_words[:max_words])
+
+    title = ' '.join(title_words)
+
+    # Clean up title
+    title = re.sub(r'^\W+', '', title)  # Remove leading non-word characters
     title = title.strip()
 
     if not title:
