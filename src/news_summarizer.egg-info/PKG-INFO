@@ -1,3 +1,53 @@
+Metadata-Version: 2.4
+Name: news-summarizer
+Version: 1.0.0
+Summary: A Python package for summarizing news articles with Gen Z/Millennial focus
+Home-page: https://github.com/yourusername/news-summarizer
+Author: News Summarizer Team
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/news-summarizer
+Project-URL: Issues, https://github.com/yourusername/news-summarizer/issues
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: torch>=1.9.0
+Requires-Dist: transformers>=4.20.0
+Requires-Dist: nltk>=3.8
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: tokenizers>=0.13.0
+Requires-Dist: sentencepiece>=0.1.97
+Requires-Dist: protobuf>=3.20.0
+Requires-Dist: huggingface-hub>=0.15.0
+Requires-Dist: safetensors>=0.3.0
+Requires-Dist: requests>=2.28.0
+Requires-Dist: tqdm>=4.64.0
+Requires-Dist: regex>=2022.7.0
+Requires-Dist: packaging>=20.0
+Requires-Dist: fastapi>=0.104.0
+Requires-Dist: uvicorn[standard]>=0.24.0
+Requires-Dist: pydantic>=2.4.0
+Requires-Dist: python-multipart>=0.0.6
+Requires-Dist: slowapi>=0.1.9
+Requires-Dist: redis>=5.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: httpx>=0.25.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: home-page
+Dynamic: requires-python
+
 # News Summarizer 📰✨
 
 A modern Python package for summarizing news articles with a Gen Z/Millennial focus. Transform lengthy articles into engaging, casual summaries that capture attention and deliver key information in an accessible format.

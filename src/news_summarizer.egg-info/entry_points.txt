@@ -1,0 +1,3 @@
+[console_scripts]
+news-api = src.api.app:main
+news-summarizer = src.cli.main:main
