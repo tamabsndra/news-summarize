@@ -167,64 +167,128 @@ class NewsArticleSummarizer:
         return bullet_points[:self.config.max_bullet_points]
 
     def _generate_journalistic_paragraph(self, text: str, summary: str) -> str:
-        """Generate a journalistic paragraph with Gen Z flair."""
+        """Generate a journalistic paragraph with Gen Z flair targeting experienced traders."""
         key_data = extract_key_data(text)
         story_type, sentiment, main_subject = analyze_story_context(text, summary)
 
-        # Create opening
-        opening = self._create_contextual_opening(story_type, sentiment, main_subject, key_data)
+        # Create factual opening (20-30% content)
+        factual_opening = self._create_factual_opening(text, summary, key_data)
 
-        # Main content
-        main_content = self._build_main_content(summary, key_data, story_type, sentiment)
+        # Professional transition
+        transition = self._get_professional_transition(story_type, sentiment)
 
-        # Conclusion
-        conclusion = self._create_relevant_conclusion(story_type, sentiment, key_data, text)
+        # Trading analysis (60-70% content)
+        trading_analysis = self._create_trading_analysis(summary, key_data, story_type, sentiment)
 
-        return f"{opening} {main_content} {conclusion}"
+        # Actionable insights
+        actionable_insights = self._create_actionable_insights(story_type, sentiment, key_data, text)
 
-    def _create_contextual_opening(self, story_type: str, sentiment: str, main_subject: str, key_data: Dict) -> str:
-        """Create contextual opening based on story type and sentiment."""
-        if story_type == 'crypto':
-            if sentiment == 'positive':
-                return f"{main_subject} is absolutely sending it today 🚀"
-            elif sentiment == 'negative':
-                return f"{main_subject} is getting absolutely rekt right now 📉"
-            else:
-                return f"{main_subject} is trading sideways but there's definitely something brewing 👀"
-        elif story_type == 'stock_earnings':
-            if sentiment == 'positive':
-                return f"{main_subject} absolutely smashed earnings expectations"
-            elif sentiment == 'negative':
-                return f"{main_subject} completely whiffed on earnings and disappointed the street"
-            else:
-                return f"{main_subject} came in pretty much as expected with earnings"
+        # Combine all parts ensuring proper flow
+        components = [factual_opening, transition, trading_analysis, actionable_insights]
+        return ' '.join(filter(None, components))
+
+    def _create_factual_opening(self, text: str, summary: str, key_data: Dict) -> str:
+        """Create a factual opening from the news content."""
+        # Extract key sentences from the original text
+        sentences = sent_tokenize(text)
+
+        # Get the most important sentences (typically first 2-3 sentences)
+        key_sentences = []
+        for sentence in sentences[:3]:
+            if len(sentence.split()) > 5:  # Avoid very short sentences
+                key_sentences.append(sentence.strip())
+
+        # Create concise factual summary
+        if key_sentences:
+            # Take first 2 sentences for factual opening
+            opening_text = ' '.join(key_sentences[:2])
+            # Remove any excessive length while preserving meaning
+            if len(opening_text.split()) > 40:
+                words = opening_text.split()
+                opening_text = ' '.join(words[:40])
+            return opening_text
         else:
-            return f"The market is showing some serious {sentiment} energy around {main_subject}"
+            return summary.split('.')[0] + '.'
 
-    def _build_main_content(self, summary: str, key_data: Dict, story_type: str, sentiment: str) -> str:
-        """Build the main content of the paragraph."""
-        # Get relevant slang based on story type and sentiment
+    def _get_professional_transition(self, story_type: str, sentiment: str) -> str:
+        """Get professional transition phrase for credibility."""
+        transitions = [
+            "From a technical standpoint, we're seeing",
+            "From a trading perspective, this signals",
+            "Looking at the charts, we're observing",
+            "From a market structure standpoint, we're seeing",
+            "Technically speaking, this indicates"
+        ]
+        return random.choice(transitions)
+
+    def _create_trading_analysis(self, summary: str, key_data: Dict, story_type: str, sentiment: str) -> str:
+        """Create substantial trading analysis with Gen Z trading vocabulary."""
+        # Trading insights based on story type and sentiment
+        analysis_components = []
+
+        # Get relevant slang and vocabulary
         slang_phrases = FINANCIAL_STORY_TYPES.get(story_type, {}).get(f"{sentiment}_slang", [])
 
-        if slang_phrases:
-            slang = random.choice(slang_phrases)
-            return f"The numbers are {slang}, and smart money is probably taking notice. {summary[:100]}..."
-        else:
-            return f"The situation is developing with {sentiment} momentum. {summary[:100]}..."
+        if story_type == 'crypto':
+            if sentiment == 'positive':
+                analysis_components.append("mixed signals with some assets holding stronger than others 📊")
+                analysis_components.append("Volume patterns are telling the real story here - institutional flows vs retail sentiment")
+            elif sentiment == 'negative':
+                analysis_components.append("bearish divergence forming across major timeframes 📉")
+                analysis_components.append("Smart money is likely de-risking while retail still holds bags")
+            else:
+                analysis_components.append("mixed signals with some assets holding stronger than others 📊")
+                analysis_components.append("Volume patterns are telling the real story here - institutional flows vs retail sentiment")
 
-    def _create_relevant_conclusion(self, story_type: str, sentiment: str, key_data: Dict, text: str) -> str:
-        """Create a relevant conclusion."""
-        conclusions = GEN_Z_TRADING_VOCABULARY.get('actionable_conclusions', [])
+        elif story_type == 'stock_earnings':
+            if sentiment == 'positive':
+                analysis_components.append("earnings momentum typically drives multi-quarter outperformance")
+                analysis_components.append("Options flow is showing heavy call activity from institutional players")
+            else:
+                analysis_components.append("earnings disappointment often creates oversold bounce opportunities")
+                analysis_components.append("Put/call ratios are elevated, suggesting capitulation might be near")
 
-        if conclusions:
-            conclusion = random.choice(conclusions)
-            if '{}' in conclusion:
-                main_subject = extract_key_data(text).get('companies', ['this'])
-                subject = main_subject[0] if main_subject else 'this'
-                return conclusion.format(subject)
-            return conclusion
         else:
-            return "This might be the setup traders have been waiting for."
+            analysis_components.append("mixed signals with some assets holding stronger than others 📊")
+            analysis_components.append("Volume patterns are telling the real story here - institutional flows vs retail sentiment")
+
+        # Add correlation insights
+        if story_type == 'crypto':
+            analysis_components.append("BTC and ETH correlation remains strong, but alt performance is diverging")
+            analysis_components.append("Alt coin resilience during macro uncertainty often signals underlying strength")
+        else:
+            analysis_components.append("Sector rotation patterns are giving us clues about where smart money is positioning")
+
+        return '. '.join(analysis_components) + '.'
+
+    def _create_actionable_insights(self, story_type: str, sentiment: str, key_data: Dict, text: str) -> str:
+        """Create actionable trading insights for experienced traders."""
+        insights = []
+
+        if story_type == 'crypto':
+            if sentiment == 'positive':
+                insights.append("Momentum plays are setting up nicely for continuation")
+                insights.append("DeFi tokens might catch a bid if this keeps up ⚡")
+            elif sentiment == 'negative':
+                insights.append("Bounce plays might emerge from oversold levels")
+                insights.append("Risk management is key - size down until volatility subsides")
+            else:
+                insights.append("Range-bound trading may persist until clearer directional catalysts emerge")
+                insights.append("Range traders have solid opportunities between established support/resistance levels ⏰")
+
+        elif story_type == 'stock_earnings':
+            if sentiment == 'positive':
+                insights.append("Earnings momentum trades typically have 2-3 week windows")
+                insights.append("Look for sector peers to follow suit with similar beats")
+            else:
+                insights.append("Oversold bounces often happen 2-3 sessions after earnings dumps")
+                insights.append("Wait for capitulation volume before considering entries")
+
+        else:
+            insights.append("Range-bound trading may persist until clearer directional catalysts emerge")
+            insights.append("Range traders have solid opportunities between established support/resistance levels ⏰")
+
+        return '. '.join(insights) + '.'
 
     def summarize_article(self, title: str, article_text: str) -> Dict[str, str]:
         """
