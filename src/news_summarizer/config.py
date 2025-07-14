@@ -17,7 +17,19 @@ class SummaryConfig:
     min_hashtags: int = 3
     max_hashtags: int = 5
     max_title_words: int = 10
-    model_name: str = "facebook/bart-large-cnn"
+    model_name: str = "human-centered-summarization/financial-summarization-pegasus"
+    sentiment_model_name: str = "mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis"
+
+
+@dataclass
+class FastSummaryConfig(SummaryConfig):
+    """Performance-optimized configuration for faster summarization."""
+    max_chunk_tokens: int = 800   # Smaller chunks for faster processing
+    min_bullet_points: int = 2    # Fewer bullet points
+    max_bullet_points: int = 3
+    min_hashtags: int = 2         # Fewer hashtags for faster generation
+    max_hashtags: int = 3
+    max_title_words: int = 6      # Shorter titles
 
 
 # Gen Z Trading Vocabulary and Templates

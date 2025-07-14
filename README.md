@@ -4,7 +4,8 @@ A modern Python package for summarizing news articles with a Gen Z/Millennial fo
 
 ## 🌟 Features
 
-- **🧠 Smart Summarization**: Uses Facebook's BART model for high-quality text summarization
+- **🧠 Smart Summarization**: Uses financial-specialized Pegasus model for high-quality financial text summarization
+- **💹 AI-Powered Sentiment Analysis**: Advanced financial sentiment analysis using DistilRoBERTa model fine-tuned on financial news
 - **🔄 Automatic Text Chunking**: Handles long articles by intelligently splitting content
 - **🎯 Gen Z/Millennial Focus**: Optimized for casual, engaging tone with financial trading slang
 - **📊 Structured Output**: Produces consistently formatted summaries with title, paragraph, and hashtags
@@ -160,7 +161,8 @@ config = SummaryConfig(
     min_hashtags=2,               # Minimum number of hashtags
     max_hashtags=4,               # Maximum number of hashtags
     max_title_words=7,            # Maximum words in title
-    model_name="facebook/bart-large-cnn"  # Hugging Face model
+    model_name="human-centered-summarization/financial-summarization-pegasus",  # Financial summarization model
+    sentiment_model_name="mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis"  # Financial sentiment analysis model
 )
 ```
 

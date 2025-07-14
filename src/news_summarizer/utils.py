@@ -85,75 +85,8 @@ def extract_key_data(text: str) -> Dict[str, Any]:
     }
 
 
-def analyze_story_context(text: str, summary: str) -> tuple:
-    """
-    Analyze story context to determine type and sentiment.
-
-    Args:
-        text: Article text
-        summary: Article summary
-
-    Returns:
-        Tuple of (story_type, sentiment, main_subject)
-    """
-    combined_text = f"{text} {summary}".lower()
-
-    # Determine story type
-    story_type = 'market_general'  # Default
-    max_matches = 0
-
-    for story_key, story_data in FINANCIAL_STORY_TYPES.items():
-        matches = sum(1 for keyword in story_data['keywords'] if keyword in combined_text)
-        if matches > max_matches:
-            max_matches = matches
-            story_type = story_key
-
-    # Determine sentiment
-    sentiment = 'neutral'  # Default
-
-    # Count positive/negative indicators
-    positive_words = ['gain', 'rise', 'up', 'increase', 'growth', 'bull', 'strong', 'beat', 'profit', 'bullish', 'buy', 'buy the dip', 'buy the rumor', 'buy the news', 'buy the hype', 'buy the pump', 'buy the rally', 'buy the breakout', 'buy the momentum', 'buy the trend', 'buy the support', 'buy the resistance', 'buy the breakout', 'buy the momentum', 'buy the trend', 'buy the support', 'buy the resistance']
-    negative_words = ['loss', 'fall', 'down', 'decrease', 'decline', 'bear', 'weak', 'miss', 'deficit', 'bearish', 'sell', 'sell the rumor', 'sell the news', 'sell the hype', 'sell the pump', 'sell the rally', 'sell the breakout', 'sell the momentum', 'sell the trend', 'sell the support', 'sell the resistance', 'sell the breakout', 'sell the momentum', 'sell the trend', 'sell the support', 'sell the resistance']
-
-    pos_count = sum(1 for word in positive_words if word in combined_text)
-    neg_count = sum(1 for word in negative_words if word in combined_text)
-
-    if pos_count > neg_count + 1:
-        sentiment = 'positive'
-    elif neg_count > pos_count + 1:
-        sentiment = 'negative'
-
-    # Extract main subject
-    main_subject = extract_main_subject(text)
-
-    return story_type, sentiment, main_subject
-
-
-def extract_main_subject(text: str) -> str:
-    """
-    Extract the main subject from text.
-
-    Args:
-        text: Article text
-
-    Returns:
-        Main subject string
-    """
-    # Extract potential company names and stock symbols
-    companies = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', text)
-    stocks = re.findall(r'\b[A-Z]{2,5}\b', text)
-
-    # Common financial terms
-    financial_terms = re.findall(r'\b(bitcoin|ethereum|tesla|apple|microsoft|amazon|meta|google|nvidia|amd|btc|eth|crypto|stock|market|trading|price|earnings|revenue|profit|loss|fed|interest|rate|inflation|gdp|unemployment|dollar|euro|currency|bond|yield|nasdaq|sp500|dow)\b', text, re.IGNORECASE)
-
-    if financial_terms:
-        return financial_terms[0].title()
-    elif stocks:
-        return stocks[0]
-    elif companies:
-        return companies[0]
-    else:
-        return "Market"
+# Note: analyze_story_context and extract_main_subject functions have been moved to the core.py module
+# to integrate with the new AI-based sentiment analysis model
 
 
 def generate_hashtags(text: str, min_count: int = 2, max_count: int = 4) -> List[str]:
